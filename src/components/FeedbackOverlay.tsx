@@ -4,8 +4,11 @@ import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 interface FeedbackOverlayProps {
   status: 'idle' | 'correct' | 'wrong';
+  isExiting?: boolean;
 }
-export function FeedbackOverlay({ status }: FeedbackOverlayProps) {
+export function FeedbackOverlay({ status, isExiting = false }: FeedbackOverlayProps) {
+  // Hide feedback if we are in the exit sequence
+  if (isExiting) return null;
   return (
     <AnimatePresence>
       {status !== 'idle' && (
@@ -23,9 +26,9 @@ export function FeedbackOverlay({ status }: FeedbackOverlayProps) {
             initial={{ scale: 0.5, rotate: -20, opacity: 0 }}
             animate={{ scale: 1.1, rotate: 0, opacity: 1 }}
             exit={{ scale: 1.5, opacity: 0 }}
-            transition={{ 
-              type: 'spring', 
-              damping: 12, 
+            transition={{
+              type: 'spring',
+              damping: 12,
               stiffness: 200,
               duration: 0.3
             }}

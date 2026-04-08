@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Play, Sparkles } from 'lucide-react';
+import { Trophy, RotateCcw, Play, Sparkles, LogOut } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sock } from '@/components/Sock';
 import { FeedbackOverlay } from '@/components/FeedbackOverlay';
+import { ExitOverlay } from '@/components/ExitOverlay';
 import { generateInitialSocks, SockData, isPerfectPair } from '@/lib/game-logic';
 import { ThemeToggle } from '@/components/ThemeToggle';
 type GameState = 'setup' | 'playing' | 'gameover';
@@ -18,6 +19,7 @@ export function HomePage() {
   const [score, setScore] = useState(0);
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
   const [isLocked, setIsLocked] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const [pairCountInput, setPairCountInput] = useState('8');
   const handleStartGame = () => {
     const count = Math.min(Math.max(parseInt(pairCountInput) || 8, 1), 20);
@@ -29,13 +31,28 @@ export function HomePage() {
     setStatus('idle');
     setIsLocked(false);
   };
-  const handleReset = () => {
-    setGameState('setup');
-    setSocks([]);
-    setSelected([]);
+  const handleRestart = () => {
+    const count = socks.length / 2;
+    const initialSocks = generateInitialSocks(count);
+    setSocks(initialSocks);
+    setGameState('playing');
     setScore(0);
+    setSelected([]);
     setStatus('idle');
     setIsLocked(false);
+  };
+  const handleExit = () => {
+    setIsLocked(true);
+    setIsExiting(true);
+    setTimeout(() => {
+      setGameState('setup');
+      setSocks([]);
+      setSelected([]);
+      setScore(0);
+      setStatus('idle');
+      setIsExiting(false);
+      setIsLocked(false);
+    }, 2000);
   };
   const validatePair = useCallback((s1: SockData, s2: SockData) => {
     setIsLocked(true);
@@ -74,7 +91,7 @@ export function HomePage() {
     }
   }, []);
   const handleSockClick = (sock: SockData) => {
-    if (isLocked || gameState !== 'playing' || sock.isMatched || selected.some(s => s.id === sock.id)) return;
+    if (isLocked || isExiting || gameState !== 'playing' || sock.isMatched || selected.some(s => s.id === sock.id)) return;
     const newSelected = [...selected, sock];
     setSelected(newSelected);
     if (newSelected.length === 2) {
@@ -98,14 +115,24 @@ export function HomePage() {
             <div className="flex items-center gap-2 md:gap-4">
               <ThemeToggle className="static" />
               {gameState !== 'setup' && (
-                <Button
-                  onClick={handleReset}
-                  variant="outline"
-                  aria-label="Back to menu"
-                  className="border-4 border-[#1A1A1A] hover:bg-sock-yellow transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]"
-                >
-                  <RotateCcw className="mr-1 md:mr-2 h-4 w-4 md:h-5 md:h-5" /> MENU
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleRestart}
+                    variant="outline"
+                    aria-label="Reset match"
+                    className="border-4 border-[#1A1A1A] hover:bg-sock-yellow transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm"
+                  >
+                    <RotateCcw className="mr-1 h-3 w-3 md:h-4 md:w-4" /> RESET
+                  </Button>
+                  <Button
+                    onClick={handleExit}
+                    variant="outline"
+                    aria-label="Exit to menu"
+                    className="border-4 border-[#1A1A1A] hover:bg-sock-red hover:text-white transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm"
+                  >
+                    <LogOut className="mr-1 h-3 w-3 md:h-4 md:w-4" /> EXIT
+                  </Button>
+                </div>
               )}
             </div>
           </header>
@@ -158,7 +185,7 @@ export function HomePage() {
                   className="flex-1 flex flex-col gap-6 md:gap-10"
                 >
                   {/* Pairing Box */}
-                  <section 
+                  <section
                     aria-label="Current selections"
                     className="relative h-40 md:h-64 rounded-3xl md:rounded-4xl border-4 border-dashed border-[#1A1A1A]/20 bg-white/50 dark:bg-black/20 flex items-center justify-center gap-4 md:gap-8 px-4"
                   >
@@ -183,7 +210,7 @@ export function HomePage() {
                     )}
                   </section>
                   {/* Pile Stage */}
-                  <section 
+                  <section
                     aria-label="Sock pile"
                     className="flex-1 relative bg-white dark:bg-zinc-900/40 rounded-3xl md:rounded-5xl border-4 border-[#1A1A1A] overflow-hidden shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] min-h-[350px] md:min-h-[500px]"
                   >
@@ -226,10 +253,10 @@ export function HomePage() {
                           <p className="text-lg md:text-2xl font-black text-[#1A1A1A]/70 mb-6 md:mb-8">Found all {totalSocks / 2} pairs with {score} points!</p>
                           <Button
                             size="lg"
-                            onClick={handleReset}
+                            onClick={handleExit}
                             className="bg-[#1A1A1A] text-white hover:bg-zinc-800 text-lg md:text-xl font-black px-8 md:px-12 py-6 md:py-8 rounded-2xl h-auto border-4 border-white shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)] active:translate-y-1"
                           >
-                            PLAY AGAIN
+                            WELL DONE!
                           </Button>
                         </motion.div>
                       )}
@@ -259,7 +286,8 @@ export function HomePage() {
           )}
         </div>
       </div>
-      <FeedbackOverlay status={status} />
+      <FeedbackOverlay status={status} isExiting={isExiting} />
+      <ExitOverlay isVisible={isExiting} />
     </div>
   );
 }
