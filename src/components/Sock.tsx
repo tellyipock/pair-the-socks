@@ -12,24 +12,29 @@ interface SockProps {
 export function Sock({ color, pattern, size, side, className, onClick }: SockProps) {
   const isLarge = size === 'large';
   const isRight = side === 'right';
+  const ariaLabel = `${color.replace('#', '')} ${pattern} ${size} ${side} sock`;
   return (
     <div
       onClick={onClick}
+      role="button"
+      aria-label={ariaLabel}
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(); }}
       className={cn(
-        "relative cursor-pointer transition-transform duration-200 active:scale-90 select-none",
-        isLarge ? "w-24 h-32" : "w-16 h-24",
+        "relative cursor-pointer transition-all duration-200 active:scale-95 select-none hover:brightness-105 active:brightness-90",
+        isLarge ? "w-20 h-28 md:w-24 md:h-32" : "w-14 h-20 md:w-16 md:h-24",
         className
       )}
     >
       <svg
         viewBox="0 0 100 120"
         className={cn(
-          "w-full h-full drop-shadow-lg",
+          "w-full h-full drop-shadow-[2px_4px_6px_rgba(0,0,0,0.2)]",
           isRight && "scale-x-[-1]"
         )}
       >
         <defs>
-          <clipPath id={`sock-clip-${pattern}-${color}`}>
+          <clipPath id={`sock-clip-${pattern}-${color}-${size}-${side}`}>
             <path d="M20,10 Q20,0 30,0 L70,0 Q80,0 80,10 L80,70 Q80,90 60,110 Q50,120 30,120 Q10,120 10,100 L10,30 Q10,10 20,10 Z" />
           </clipPath>
         </defs>
@@ -38,22 +43,24 @@ export function Sock({ color, pattern, size, side, className, onClick }: SockPro
           d="M20,10 Q20,0 30,0 L70,0 Q80,0 80,10 L80,70 Q80,90 60,110 Q50,120 30,120 Q10,120 10,100 L10,30 Q10,10 20,10 Z"
           fill={color}
           stroke="#1A1A1A"
-          strokeWidth="4"
+          strokeWidth="5"
+          strokeLinejoin="round"
         />
         {/* Pattern Implementation */}
-        <g clipPath={`url(#sock-clip-${pattern}-${color})`}>
+        <g clipPath={`url(#sock-clip-${pattern}-${color}-${size}-${side})`}>
           {pattern === 'dots' && (
-            <g fill="white" opacity="0.4">
-              <circle cx="30" cy="30" r="5" />
-              <circle cx="60" cy="20" r="5" />
-              <circle cx="45" cy="50" r="5" />
-              <circle cx="25" cy="75" r="5" />
-              <circle cx="55" cy="85" r="5" />
-              <circle cx="40" cy="100" r="5" />
+            <g fill="white" opacity="0.5">
+              <circle cx="30" cy="25" r="6" />
+              <circle cx="65" cy="15" r="6" />
+              <circle cx="50" cy="45" r="6" />
+              <circle cx="25" cy="70" r="6" />
+              <circle cx="60" cy="85" r="6" />
+              <circle cx="35" cy="100" r="6" />
+              <circle cx="75" cy="60" r="6" />
             </g>
           )}
           {pattern === 'stripes' && (
-            <g stroke="white" strokeWidth="6" opacity="0.4">
+            <g stroke="white" strokeWidth="8" opacity="0.4">
               <line x1="0" y1="20" x2="100" y2="20" />
               <line x1="0" y1="40" x2="100" y2="40" />
               <line x1="0" y1="60" x2="100" y2="60" />
@@ -62,25 +69,39 @@ export function Sock({ color, pattern, size, side, className, onClick }: SockPro
             </g>
           )}
           {pattern === 'stars' && (
-            <g fill="white" opacity="0.4" transform="scale(0.8) translate(10, 10)">
-              <path d="M20,10 L25,25 L40,25 L30,35 L35,50 L20,40 L5,50 L10,35 L0,25 L15,25 Z" transform="translate(10, 10)" />
-              <path d="M20,10 L25,25 L40,25 L30,35 L35,50 L20,40 L5,50 L10,35 L0,25 L15,25 Z" transform="translate(50, 40)" />
-              <path d="M20,10 L25,25 L40,25 L30,35 L35,50 L20,40 L5,50 L10,35 L0,25 L15,25 Z" transform="translate(15, 80)" />
+            <g fill="white" opacity="0.5">
+              <path d="M20,10 L24,18 L32,18 L26,24 L28,32 L20,27 L12,32 L14,24 L8,18 L16,18 Z" transform="translate(10, 5) scale(0.8)" />
+              <path d="M20,10 L24,18 L32,18 L26,24 L28,32 L20,27 L12,32 L14,24 L8,18 L16,18 Z" transform="translate(45, 35) scale(0.8)" />
+              <path d="M20,10 L24,18 L32,18 L26,24 L28,32 L20,27 L12,32 L14,24 L8,18 L16,18 Z" transform="translate(15, 75) scale(0.8)" />
+              <path d="M20,10 L24,18 L32,18 L26,24 L28,32 L20,27 L12,32 L14,24 L8,18 L16,18 Z" transform="translate(50, 80) scale(0.6)" />
             </g>
           )}
           {pattern === 'waves' && (
-            <path
-              d="M0,20 Q25,10 50,20 T100,20 M0,50 Q25,40 50,50 T100,50 M0,80 Q25,70 50,80 T100,80"
-              stroke="white"
-              strokeWidth="4"
-              fill="none"
-              opacity="0.4"
-            />
+            <g opacity="0.5">
+              <path
+                d="M-20,20 Q10,10 40,20 T100,20 T140,20"
+                stroke="white"
+                strokeWidth="6"
+                fill="none"
+              />
+              <path
+                d="M-20,50 Q10,40 40,50 T100,50 T140,50"
+                stroke="white"
+                strokeWidth="6"
+                fill="none"
+              />
+              <path
+                d="M-20,80 Q10,70 40,80 T100,80 T140,80"
+                stroke="white"
+                strokeWidth="6"
+                fill="none"
+              />
+            </g>
           )}
         </g>
-        {/* Sock Heel & Toe Accents */}
-        <path d="M10,90 Q15,115 35,115" stroke="black" strokeWidth="2" fill="none" opacity="0.2" />
-        <path d="M70,0 L70,20" stroke="black" strokeWidth="2" fill="none" opacity="0.2" />
+        {/* Cuffs, Heel & Toe Highlights for detail */}
+        <path d="M20,5 L80,5" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.3" />
+        <path d="M15,95 Q25,110 45,110" stroke="black" strokeWidth="3" fill="none" opacity="0.15" />
       </svg>
     </div>
   );
