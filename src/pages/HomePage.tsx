@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, RotateCcw, Play, Sparkles, LogOut } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -21,6 +21,13 @@ export function HomePage() {
   const [isLocked, setIsLocked] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [pairCountInput, setPairCountInput] = useState('8');
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Cleanup timers on unmount or state change
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
   const handleStartGame = () => {
     const count = Math.min(Math.max(parseInt(pairCountInput) || 8, 1), 20);
     const initialSocks = generateInitialSocks(count);
@@ -32,6 +39,7 @@ export function HomePage() {
     setIsLocked(false);
   };
   const handleRestart = () => {
+    if (isLocked) return;
     const count = socks.length / 2;
     const initialSocks = generateInitialSocks(count);
     setSocks(initialSocks);
@@ -42,9 +50,11 @@ export function HomePage() {
     setIsLocked(false);
   };
   const handleExit = () => {
+    if (isExiting) return;
     setIsLocked(true);
     setIsExiting(true);
-    setTimeout(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setGameState('setup');
       setSocks([]);
       setSelected([]);
@@ -58,7 +68,7 @@ export function HomePage() {
     setIsLocked(true);
     if (isPerfectPair(s1, s2)) {
       setStatus('correct');
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setSocks(prev => {
           const nextSocks = prev.map(s =>
             (s.id === s1.id || s.id === s2.id) ? { ...s, isMatched: true } : s
@@ -82,7 +92,7 @@ export function HomePage() {
       }, 800);
     } else {
       setStatus('wrong');
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setSelected([]);
         setScore(prev => Math.max(0, prev - 1));
         setStatus('idle');
@@ -91,7 +101,8 @@ export function HomePage() {
     }
   }, []);
   const handleSockClick = (sock: SockData) => {
-    if (isLocked || isExiting || gameState !== 'playing' || sock.isMatched || selected.some(s => s.id === sock.id)) return;
+    if (isLocked || isExiting || gameState !== 'playing') return;
+    if (sock.isMatched || selected.some(s => s.id === sock.id)) return;
     const newSelected = [...selected, sock];
     setSelected(newSelected);
     if (newSelected.length === 2) {
@@ -104,8 +115,7 @@ export function HomePage() {
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#1A1A1A] text-foreground font-sans overflow-x-hidden selection:bg-sock-yellow selection:text-[#1A1A1A]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-6 md:py-10 flex flex-col gap-6 md:gap-10 min-h-screen">
-          {/* Header */}
-          <header className="flex items-center justify-between">
+          <header className="flex items-center justify-between shrink-0">
             <div className="space-y-1">
               <h1 className="text-3xl md:text-5xl font-display font-black text-[#1A1A1A] dark:text-white uppercase tracking-tighter">
                 Pair <span className="text-sock-red">The</span> Socks
@@ -118,15 +128,15 @@ export function HomePage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleRestart}
-                    aria-label="Reset match"
-                    className="bg-sock-yellow text-[#1A1A1A] border-4 border-[#1A1A1A] hover:bg-[#FACC15] transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm active:translate-y-0.5 active:shadow-none"
+                    disabled={isLocked}
+                    className="bg-sock-yellow text-[#1A1A1A] border-4 border-[#1A1A1A] hover:bg-[#FACC15] transition-all font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm active:translate-y-0.5 active:shadow-none"
                   >
                     <RotateCcw className="mr-1 h-3 w-3 md:h-4 md:w-4" /> RESET
                   </Button>
                   <Button
                     onClick={handleExit}
-                    aria-label="Exit to menu"
-                    className="bg-sock-red text-white border-4 border-[#1A1A1A] hover:bg-[#E55353] transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm active:translate-y-0.5 active:shadow-none"
+                    disabled={isExiting}
+                    className="bg-sock-red text-white border-4 border-[#1A1A1A] hover:bg-[#E55353] transition-all font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm active:translate-y-0.5 active:shadow-none"
                   >
                     <LogOut className="mr-1 h-3 w-3 md:h-4 md:w-4" /> EXIT
                   </Button>
@@ -134,7 +144,7 @@ export function HomePage() {
               )}
             </div>
           </header>
-          <main className="flex-1 flex flex-col relative">
+          <main className="flex-1 flex flex-col relative min-h-0">
             <AnimatePresence mode="wait">
               {gameState === 'setup' ? (
                 <motion.div
@@ -167,7 +177,6 @@ export function HomePage() {
                       </div>
                       <Button
                         onClick={handleStartGame}
-                        aria-label="Start Game"
                         className="w-full h-16 md:h-20 text-xl md:text-2xl font-black bg-sock-blue hover:bg-sock-blue/90 text-white border-4 border-[#1A1A1A] rounded-xl md:rounded-2xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] active:translate-y-1 active:shadow-none transition-all uppercase"
                       >
                         <Play className="mr-2 fill-current w-5 h-5 md:w-6 md:h-6" /> Start Game
@@ -180,12 +189,11 @@ export function HomePage() {
                   key="game"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex-1 flex flex-col gap-6 md:gap-10"
+                  className="flex-1 flex flex-col gap-6 md:gap-10 min-h-0"
                 >
-                  {/* Pairing Box */}
                   <section
                     aria-label="Current selections"
-                    className="relative h-40 md:h-64 rounded-3xl md:rounded-4xl border-4 border-dashed border-[#1A1A1A]/20 bg-white/50 dark:bg-black/20 flex items-center justify-center gap-4 md:gap-8 px-4"
+                    className="relative shrink-0 h-40 md:h-64 rounded-3xl md:rounded-4xl border-4 border-dashed border-[#1A1A1A]/20 bg-white/50 dark:bg-black/20 flex items-center justify-center gap-4 md:gap-8 px-4"
                   >
                     <AnimatePresence mode="popLayout">
                       {selected.map((sock) => (
@@ -207,10 +215,9 @@ export function HomePage() {
                       <div className="w-16 h-24 md:w-24 md:h-32 rounded-2xl md:rounded-3xl border-4 border-dashed border-[#1A1A1A]/10 animate-pulse bg-[#1A1A1A]/5" />
                     )}
                   </section>
-                  {/* Pile Stage */}
                   <section
                     aria-label="Sock pile"
-                    className="flex-1 relative bg-white dark:bg-zinc-900/40 rounded-3xl md:rounded-5xl border-4 border-[#1A1A1A] overflow-hidden shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] min-h-[350px] md:min-h-[500px]"
+                    className="flex-1 relative bg-white dark:bg-zinc-900/40 rounded-3xl md:rounded-5xl border-4 border-[#1A1A1A] overflow-hidden shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] min-h-[50vh]"
                   >
                     <div className="absolute inset-0 p-4 md:p-10">
                       {socks.filter(s => !s.isMatched && !selected.some(sel => sel.id === s.id)).map((sock) => (
@@ -264,9 +271,8 @@ export function HomePage() {
               )}
             </AnimatePresence>
           </main>
-          {/* Scoreboard */}
           {gameState !== 'setup' && (
-            <footer className="flex justify-center pb-6 md:pb-8">
+            <footer className="flex justify-center shrink-0 pb-6 md:pb-8">
               <Card className="px-8 md:px-12 py-4 md:py-6 border-4 border-[#1A1A1A] bg-sock-blue text-white rounded-3xl md:rounded-4xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
                 <div className="flex items-center gap-6 md:gap-12">
                   <div className="text-center">

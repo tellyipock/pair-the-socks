@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { SockColor, SockPattern, SockSize, SockSide } from '@/lib/game-logic';
 interface SockProps {
+  id: string;
   color: SockColor;
   pattern: SockPattern;
   size: SockSize;
@@ -9,10 +10,11 @@ interface SockProps {
   className?: string;
   onClick?: () => void;
 }
-export function Sock({ color, pattern, size, side, className, onClick }: SockProps) {
+export function Sock({ id, color, pattern, size, side, className, onClick }: SockProps) {
   const isLarge = size === 'large';
   const isRight = side === 'right';
   const ariaLabel = `${color.replace('#', '')} ${pattern} ${size} ${side} sock`;
+  const clipId = `sock-clip-${id}`;
   return (
     <div
       onClick={onClick}
@@ -34,7 +36,7 @@ export function Sock({ color, pattern, size, side, className, onClick }: SockPro
         )}
       >
         <defs>
-          <clipPath id={`sock-clip-${pattern}-${color}-${size}-${side}`}>
+          <clipPath id={clipId}>
             <path d="M20,10 Q20,0 30,0 L70,0 Q80,0 80,10 L80,70 Q80,90 60,110 Q50,120 30,120 Q10,120 10,100 L10,30 Q10,10 20,10 Z" />
           </clipPath>
         </defs>
@@ -47,7 +49,7 @@ export function Sock({ color, pattern, size, side, className, onClick }: SockPro
           strokeLinejoin="round"
         />
         {/* Pattern Implementation */}
-        <g clipPath={`url(#sock-clip-${pattern}-${color}-${size}-${side})`}>
+        <g clipPath={`url(#${clipId})`}>
           {pattern === 'dots' && (
             <g fill="white" opacity="0.5">
               <circle cx="30" cy="25" r="6" />
@@ -78,28 +80,13 @@ export function Sock({ color, pattern, size, side, className, onClick }: SockPro
           )}
           {pattern === 'waves' && (
             <g opacity="0.5">
-              <path
-                d="M-20,20 Q10,10 40,20 T100,20 T140,20"
-                stroke="white"
-                strokeWidth="6"
-                fill="none"
-              />
-              <path
-                d="M-20,50 Q10,40 40,50 T100,50 T140,50"
-                stroke="white"
-                strokeWidth="6"
-                fill="none"
-              />
-              <path
-                d="M-20,80 Q10,70 40,80 T100,80 T140,80"
-                stroke="white"
-                strokeWidth="6"
-                fill="none"
-              />
+              <path d="M-20,20 Q10,10 40,20 T100,20 T140,20" stroke="white" strokeWidth="6" fill="none" />
+              <path d="M-20,50 Q10,40 40,50 T100,50 T140,50" stroke="white" strokeWidth="6" fill="none" />
+              <path d="M-20,80 Q10,70 40,80 T100,80 T140,80" stroke="white" strokeWidth="6" fill="none" />
             </g>
           )}
         </g>
-        {/* Cuffs, Heel & Toe Highlights for detail */}
+        {/* Cuffs, Heel & Toe Highlights */}
         <path d="M20,5 L80,5" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.3" />
         <path d="M15,95 Q25,110 45,110" stroke="black" strokeWidth="3" fill="none" opacity="0.15" />
       </svg>
