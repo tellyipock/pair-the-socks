@@ -118,17 +118,15 @@ export function HomePage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleRestart}
-                    variant="outline"
                     aria-label="Reset match"
-                    className="border-4 border-[#1A1A1A] hover:bg-sock-yellow transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm"
+                    className="bg-sock-yellow text-[#1A1A1A] border-4 border-[#1A1A1A] hover:bg-[#FACC15] transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm active:translate-y-0.5 active:shadow-none"
                   >
                     <RotateCcw className="mr-1 h-3 w-3 md:h-4 md:w-4" /> RESET
                   </Button>
                   <Button
                     onClick={handleExit}
-                    variant="outline"
                     aria-label="Exit to menu"
-                    className="border-4 border-[#1A1A1A] hover:bg-sock-red hover:text-white transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm"
+                    className="bg-sock-red text-white border-4 border-[#1A1A1A] hover:bg-[#E55353] transition-colors font-black rounded-xl h-10 md:h-12 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] text-xs md:text-sm active:translate-y-0.5 active:shadow-none"
                   >
                     <LogOut className="mr-1 h-3 w-3 md:h-4 md:w-4" /> EXIT
                   </Button>
