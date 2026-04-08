@@ -17,10 +17,10 @@ export interface SockData {
 const COLORS: SockColor[] = ['#FFD93D', '#4D96FF', '#FF6B6B', '#6BCB77', '#9B72AA'];
 const PATTERNS: SockPattern[] = ['dots', 'stripes', 'stars', 'waves'];
 const SIZES: SockSize[] = ['small', 'large'];
-export function generateInitialSocks(): SockData[] {
+export function generateInitialSocks(numPairs: number = 8): SockData[] {
   const socks: SockData[] = [];
-  // Generate 6 pairs (12 socks total)
-  for (let i = 0; i < 6; i++) {
+  // Generate pairs based on requested count
+  for (let i = 0; i < numPairs; i++) {
     const color = COLORS[Math.floor(Math.random() * COLORS.length)];
     const pattern = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
     const size = SIZES[Math.floor(Math.random() * SIZES.length)];
@@ -33,8 +33,9 @@ export function generateInitialSocks(): SockData[] {
         size,
         side: side as SockSide,
         isMatched: false,
-        x: 10 + Math.random() * 80, // % within container
-        y: 10 + Math.random() * 80, // % within container
+        // Calculate random positions (10-90% to avoid edge overlap)
+        x: 5 + Math.random() * 85,
+        y: 5 + Math.random() * 85,
         rotation: Math.random() * 360,
       });
     });
