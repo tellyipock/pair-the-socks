@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+﻿import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Play, Sparkles, LogOut } from 'lucide-react';
+import { Trophy, RotateCcw, Play, Sparkles, LogOut, Timer, Frown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,6 +12,15 @@ import { ExitOverlay } from '@/components/ExitOverlay';
 import { generateInitialSocks, SockData, isPerfectPair } from '@/lib/game-logic';
 import { ThemeToggle } from '@/components/ThemeToggle';
 type GameState = 'setup' | 'playing' | 'gameover';
+type GameOutcome = 'won' | 'lost' | null;
+
+const BASE_PAIRS = 8;
+const BASE_TIME = 30;
+const SECONDS_PER_EXTRA_PAIR = 2;
+
+function calcInitialTime(numPairs: number): number {
+  return BASE_TIME + Math.max(0, numPairs - BASE_PAIRS) * SECONDS_PER_EXTRA_PAIR;
+}
 export function HomePage() {
   const [gameState, setGameState] = useState<GameState>('setup');
   const [socks, setSocks] = useState<SockData[]>([]);
@@ -21,12 +30,32 @@ export function HomePage() {
   const [isLocked, setIsLocked] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [pairCountInput, setPairCountInput] = useState('8');
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [gameOutcome, setGameOutcome] = useState<GameOutcome>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  // Cleanup timers on unmount or state change
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  // Cleanup all timers on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
     };
+  }, []);
+
+  const startCountdown = useCallback((seconds: number) => {
+    setTimeLeft(seconds);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current!);
+          setGameState('gameover');
+          setGameOutcome('lost');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   }, []);
   const handleStartGame = () => {
     const count = Math.min(Math.max(parseInt(pairCountInput) || 8, 1), 20);
@@ -37,6 +66,8 @@ export function HomePage() {
     setSelected([]);
     setStatus('idle');
     setIsLocked(false);
+    setGameOutcome(null);
+    startCountdown(calcInitialTime(count));
   };
   const handleRestart = () => {
     if (isLocked) return;
@@ -48,11 +79,14 @@ export function HomePage() {
     setSelected([]);
     setStatus('idle');
     setIsLocked(false);
+    setGameOutcome(null);
+    startCountdown(calcInitialTime(count));
   };
   const handleExit = () => {
     if (isExiting) return;
     setIsLocked(true);
     setIsExiting(true);
+    if (countdownRef.current) clearInterval(countdownRef.current);
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setGameState('setup');
@@ -75,6 +109,8 @@ export function HomePage() {
           );
           const stillLeft = nextSocks.filter(s => !s.isMatched).length;
           if (stillLeft === 0) {
+            clearInterval(countdownRef.current!);
+            setGameOutcome('won');
             setGameState('gameover');
             confetti({
               particleCount: 150,
@@ -111,6 +147,9 @@ export function HomePage() {
   };
   const matchedCount = socks.filter(s => s.isMatched).length;
   const totalSocks = socks.length;
+  const numPairs = Math.min(Math.max(parseInt(pairCountInput) || 8, 1), 20);
+  const previewTime = calcInitialTime(numPairs);
+  const isTimeLow = timeLeft <= 10 && timeLeft > 0;
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#1A1A1A] text-foreground font-sans overflow-x-hidden selection:bg-sock-yellow selection:text-[#1A1A1A]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -174,6 +213,10 @@ export function HomePage() {
                           onChange={(e) => setPairCountInput(e.target.value)}
                           className="text-xl md:text-2xl h-14 md:h-16 text-center font-black rounded-xl"
                         />
+                      </div>
+                      <div className="flex items-center justify-center gap-2 py-1 text-sm font-bold text-muted-foreground">
+                        <Timer className="w-4 h-4" />
+                        <span>You&apos;ll have <span className="text-[#1A1A1A] dark:text-white font-black">{previewTime}s</span> to find all pairs</span>
                       </div>
                       <Button
                         onClick={handleStartGame}
@@ -241,7 +284,7 @@ export function HomePage() {
                       ))}
                     </div>
                     <AnimatePresence>
-                      {gameState === 'gameover' && (
+                      {gameState === 'gameover' && gameOutcome === 'won' && (
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -265,6 +308,41 @@ export function HomePage() {
                           </Button>
                         </motion.div>
                       )}
+                      {gameState === 'gameover' && gameOutcome === 'lost' && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="absolute inset-0 z-50 bg-red-500 flex flex-col items-center justify-center p-6 text-center"
+                        >
+                          <motion.div
+                            initial={{ scale: 0, rotate: 20 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: 'spring', damping: 12, stiffness: 100 }}
+                          >
+                            <Frown className="w-24 h-24 md:w-32 md:h-32 text-white mb-4 md:mb-6 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.2)]" />
+                          </motion.div>
+                          <h2 className="text-4xl md:text-6xl font-black text-white mb-2 md:mb-4 uppercase italic leading-none">Time&apos;s Up!</h2>
+                          <p className="text-lg md:text-2xl font-black text-white/80 mb-6 md:mb-8">
+                            You found {matchedCount / 2} of {totalSocks / 2} pairs. Try again!
+                          </p>
+                          <div className="flex gap-3 flex-wrap justify-center">
+                            <Button
+                              size="lg"
+                              onClick={handleRestart}
+                              className="bg-white text-red-500 hover:bg-white/90 text-lg md:text-xl font-black px-8 md:px-12 py-6 md:py-8 rounded-2xl h-auto border-4 border-white/30 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)] active:translate-y-1"
+                            >
+                              <RotateCcw className="mr-2 w-5 h-5" /> TRY AGAIN
+                            </Button>
+                            <Button
+                              size="lg"
+                              onClick={handleExit}
+                              className="bg-transparent text-white hover:bg-white/10 text-lg md:text-xl font-black px-8 md:px-12 py-6 md:py-8 rounded-2xl h-auto border-4 border-white/40 active:translate-y-1"
+                            >
+                              EXIT
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
                   </section>
                 </motion.div>
@@ -284,6 +362,19 @@ export function HomePage() {
                     <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest">Pairs</p>
                     <p className="text-3xl md:text-5xl font-black tabular-nums">{matchedCount / 2}/{totalSocks / 2}</p>
                   </div>
+                  <div className="h-10 md:h-12 w-1 bg-white/20 rounded-full" />
+                  <motion.div
+                    className="text-center"
+                    animate={isTimeLow ? { scale: [1, 1.08, 1] } : {}}
+                    transition={{ repeat: Infinity, duration: 0.6 }}
+                  >
+                    <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest flex items-center gap-1 justify-center">
+                      <Timer className="w-3 h-3" /> Time
+                    </p>
+                    <p className={`text-3xl md:text-5xl font-black tabular-nums ${isTimeLow ? 'text-sock-yellow' : ''}`}>
+                      {timeLeft}s
+                    </p>
+                  </motion.div>
                 </div>
               </Card>
             </footer>
