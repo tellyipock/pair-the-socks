@@ -1,27 +1,31 @@
-# Pair the Socks
+# Pair the Socks 🧦
 
-[cloudflarebutton]
+A fun and educational matching game for kids! Players are shown a pile of colorful socks and must find and pair each matching sock before time runs out. Great for developing memory, pattern recognition, and color identification skills in young learners.
 
-A high-performance web application built on Cloudflare's modern developer stack. This project leverages Cloudflare Workers for its backend logic and Vite-powered React for the frontend, ensuring a seamless, global-scale experience with minimal latency.
+## 🎮 How to Play
+
+1. A jumbled pile of socks appears on screen
+2. Click or tap a sock to select it
+3. Find its matching pair — same color, pattern, and size
+4. Match all the pairs to win!
 
 ## 🚀 Overview
 
-This application is designed to demonstrate a robust full-stack architecture using Cloudflare's ecosystem. It provides a type-safe environment from the edge to the browser, utilizing Hono for routing and React with Tailwind CSS for a sophisticated UI.
+A full-stack web application with a React frontend and an Express.js backend, deployed on SiteGround shared hosting. The game is entirely client-side — all matching logic runs in the browser with no server round-trips needed for gameplay.
 
 ## ✨ Key Features
 
-- **Edge-First Backend**: Powered by Cloudflare Workers and Hono for ultra-fast API responses.
-- **Modern Frontend**: Built with React 18, Vite, and TypeScript for a premier developer experience.
-- **Beautiful UI Components**: Styled with Tailwind CSS and pre-configured with Radix UI / Shadcn primitives.
-- **Workflow & Persistence**: Architecture ready for Cloudflare Workflows, KV, and Durable Objects.
-- **Type Safety**: End-to-end TypeScript integration across both the worker and the client.
-- **Error Resiliency**: Built-in global error boundaries and client-side error reporting to the worker.
-- **Responsive Design**: Mobile-first approach with a built-in sidebar system and dark mode support.
+- **Fun Matching Gameplay**: Colorful socks with different patterns, colors, and sizes to match.
+- **Modern Frontend**: Built with React 18, Vite, and TypeScript for a fast, responsive experience.
+- **Beautiful UI Components**: Styled with Tailwind CSS and Radix UI / Shadcn primitives.
+- **Type Safety**: End-to-end TypeScript across both the frontend and backend.
+- **Error Resiliency**: Built-in global error boundaries and client-side error reporting.
+- **Responsive Design**: Mobile-first approach with dark mode support.
 
 ## 🛠 Technology Stack
 
-- **Framework**: [React](https://reactjs.org/) (Client) & [Hono](https://hono.dev/) (Worker)
-- **Runtime**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Framework**: [React](https://reactjs.org/) (Client) & [Express.js](https://expressjs.com/) (Server)
+- **Runtime**: [Node.js](https://nodejs.org/) on [SiteGround](https://www.siteground.com/) shared hosting
 - **Bundler**: [Vite](https://vitejs.dev/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **State Management**: [Zustand](https://github.com/pmndrs/zustand) & [TanStack Query](https://tanstack.com/query/latest)
@@ -49,13 +53,14 @@ You will need [Bun](https://bun.sh/) installed on your local machine to manage d
 
 ### Development
 
-Start the development server (both Vite and the Worker simulator):
+Start both the Vite dev server and the Express backend concurrently:
 
 ```bash
 bun run dev
 ```
 
-The frontend will be available at `http://localhost:3000` and the API at `http://localhost:3000/api`.
+- Frontend: `http://localhost:3000`
+- API: `http://localhost:3000/api` (proxied to Express on port 3001)
 
 ### Project Structure
 
@@ -63,29 +68,44 @@ The frontend will be available at `http://localhost:3000` and the API at `http:/
   - `components/`: UI components (including Shadcn/UI).
   - `pages/`: Application views/routes.
   - `hooks/`: Reusable React logic.
-- `worker/`: Cloudflare Worker backend.
-  - `index.ts`: Entry point and middleware.
-  - `userRoutes.ts`: Define your API endpoints here.
-- `shared/`: TypeScript types and logic shared between frontend and backend.
+  - `lib/`: Game logic and utilities.
+- `server/`: Express.js backend.
+  - `index.ts`: Server entry point with middleware and static file serving.
+  - `routes.ts`: API endpoint definitions.
+- `public/`: Static assets copied to `dist/` at build time (includes `.htaccess`).
 
-## ☁️ Deployment
+## ☁️ Deployment (SiteGround Shared Hosting)
 
-Deploying to Cloudflare is streamlined via Wrangler.
+This app is deployed as a **static site** on SiteGround using Apache to serve the built React files.
 
-[cloudflarebutton]
+### Build
 
-### Manual Deployment
+```bash
+bun run build
+```
 
-1. Build the frontend and deploy the worker:
-   ```bash
-   bun run deploy
-   ```
+This outputs the built frontend to `dist/`, including a `.htaccess` file for SPA routing.
 
-2. Follow the prompts to authenticate with your Cloudflare account if you haven't already.
+### Upload via FTP/FileZilla
+
+Upload the **contents** of `dist/` to your target folder on SiteGround, e.g.:
+```
+/public_html/apps/games/pair-the-socks/
+```
+
+The folder should contain:
+```
+.htaccess
+index.html
+assets/
+vite.svg
+```
 
 ### Configuration
 
-Environment bindings and project settings are managed in `wrangler.jsonc`. Ensure your `compatibility_date` is kept up to date for the latest Cloudflare features.
+- **Base path**: Set in `.env.production` via `VITE_BASE_PATH`. Update this if the deployment folder changes.
+- **SPA routing**: Handled by `public/.htaccess` (Apache mod_rewrite). Update `RewriteBase` if the deployment path changes.
+- **API routes**: Defined in `server/routes.ts`. Not active on static hosting — gameplay is fully client-side.
 
 ## 📄 License
 
@@ -93,4 +113,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-*Built with ❤️ on the Cloudflare Developer Platform*
+*Built with ❤️ for kids learning through play*
