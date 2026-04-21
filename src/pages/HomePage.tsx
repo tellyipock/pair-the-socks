@@ -1,6 +1,8 @@
 ﻿import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Play, Sparkles, LogOut, Timer, Frown } from 'lucide-react';
+import { Trophy, RotateCcw, Play, LogOut, Timer, Frown } from 'lucide-react';
+import kidsgoflashLogoSquare from '@/assets/kidsGoflash_Logo_Square.jpg';
+import pairTheSocksGame from '@/assets/pair_the_socks_game.png';
 import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -116,7 +118,7 @@ export function HomePage() {
               particleCount: 150,
               spread: 70,
               origin: { y: 0.6 },
-              colors: ['#FFD93D', '#4D96FF', '#FF6B6B', '#6BCB77', '#9B72AA']
+              colors: ['#FFD93D', '#00B0F0', '#FF6B6B', '#d2ffd1', '#9B72AA']
             });
           }
           return nextSocks;
@@ -152,14 +154,17 @@ export function HomePage() {
   const isTimeLow = timeLeft <= 10 && timeLeft > 0;
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#1A1A1A] text-foreground font-sans overflow-x-hidden selection:bg-sock-yellow selection:text-[#1A1A1A]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-6 md:py-10 flex flex-col gap-6 md:gap-10 min-h-screen">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+        <div className="py-4 md:py-8 flex flex-col gap-4 md:gap-8 min-h-screen">
           <header className="flex items-center justify-between shrink-0">
-            <div className="space-y-1">
-              <h1 className="text-3xl md:text-5xl font-display font-black text-[#1A1A1A] dark:text-white uppercase tracking-tighter">
+            <div className="flex items-center gap-3 md:gap-4">
+              <img src={kidsgoflashLogoSquare} alt="KidsGoFlash" className="h-12 md:h-16 w-12 md:w-16 object-cover shrink-0" />
+              <div className="space-y-1">
+              <h2 className="text-3xl md:text-5xl font-display font-black text-[#1A1A1A] dark:text-white uppercase tracking-tighter">
                 Pair <span className="text-sock-red">The</span> Socks
-              </h1>
+              </h2>
               <p className="text-muted-foreground font-bold text-sm md:text-base">Visual matching for super kids!</p>
+              </div>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
               <ThemeToggle className="static" />
@@ -193,13 +198,13 @@ export function HomePage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="flex-1 flex items-center justify-center py-4"
                 >
-                  <Card className="max-w-md w-full p-6 md:p-10 border-4 border-[#1A1A1A] rounded-3xl md:rounded-4xl shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] bg-white space-y-6 md:space-y-8">
+                  <Card className="max-w-md w-full p-4 md:p-8 border-4 border-[#1A1A1A] rounded-3xl md:rounded-4xl shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] bg-white space-y-6 md:space-y-8">
                     <div className="text-center space-y-2">
-                      <div className="inline-flex p-3 md:p-4 bg-sock-yellow border-4 border-[#1A1A1A] rounded-2xl md:rounded-3xl mb-2 rotate-3 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
-                        <Sparkles className="w-10 h-10 md:w-12 md:h-12 text-[#1A1A1A]" />
+                      <div className="inline-flex mb-2">
+                        <img src={pairTheSocksGame} alt="Pair The Socks" className="w-24 h-24 md:w-32 md:h-32 object-contain" />
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-black text-[#1A1A1A] uppercase italic">Ready to Play?</h2>
-                      <p className="text-muted-foreground font-bold">How many pairs do you want to find?</p>
+                      <h3 className="text-2xl md:text-3xl font-black text-[#1A1A1A] uppercase italic">Ready to Play?</h3>
+                      <p className="text-muted-foreground font-bold">How many pairs of socks do you want to find?</p>
                     </div>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -232,8 +237,36 @@ export function HomePage() {
                   key="game"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex-1 flex flex-col gap-6 md:gap-10 min-h-0"
+                  className="flex-1 flex flex-col gap-4 md:gap-6 min-h-0"
                 >
+                  <div className="flex justify-center shrink-0">
+                    <Card className="px-6 md:px-10 py-3 md:py-4 border-4 border-[#1A1A1A] bg-sock-blue text-white rounded-2xl md:rounded-3xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
+                      <div className="flex items-center gap-5 md:gap-10">
+                        <div className="text-center">
+                          <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest">Score</p>
+                          <p className="text-2xl md:text-4xl font-black tabular-nums">{score}</p>
+                        </div>
+                        <div className="h-8 md:h-10 w-1 bg-white/20 rounded-full" />
+                        <div className="text-center">
+                          <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest">Pairs</p>
+                          <p className="text-2xl md:text-4xl font-black tabular-nums">{matchedCount / 2}/{totalSocks / 2}</p>
+                        </div>
+                        <div className="h-8 md:h-10 w-1 bg-white/20 rounded-full" />
+                        <motion.div
+                          className="text-center"
+                          animate={isTimeLow ? { scale: [1, 1.08, 1] } : {}}
+                          transition={{ repeat: Infinity, duration: 0.6 }}
+                        >
+                          <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest flex items-center gap-1 justify-center">
+                            <Timer className="w-3 h-3" /> Time
+                          </p>
+                          <p className={`text-2xl md:text-4xl font-black tabular-nums ${isTimeLow ? 'text-sock-yellow' : ''}`}>
+                            {timeLeft}s
+                          </p>
+                        </motion.div>
+                      </div>
+                    </Card>
+                  </div>
                   <section
                     aria-label="Current selections"
                     className="relative shrink-0 h-40 md:h-64 rounded-3xl md:rounded-4xl border-4 border-dashed border-[#1A1A1A]/20 bg-white/50 dark:bg-black/20 flex items-center justify-center gap-4 md:gap-8 px-4"
@@ -297,7 +330,7 @@ export function HomePage() {
                           >
                             <Trophy className="w-24 h-24 md:w-32 md:h-32 text-[#1A1A1A] mb-4 md:mb-6 drop-shadow-[4px_4px_0px_rgba(255,255,255,1)]" />
                           </motion.div>
-                          <h2 className="text-4xl md:text-6xl font-black text-[#1A1A1A] mb-2 md:mb-4 uppercase italic leading-none">Super Matcher!</h2>
+                          <h3 className="text-4xl md:text-6xl font-black text-[#1A1A1A] mb-2 md:mb-4 uppercase italic leading-none">Super Matcher!</h3>
                           <p className="text-lg md:text-2xl font-black text-[#1A1A1A]/70 mb-6 md:mb-8">Found all {totalSocks / 2} pairs with {score} points!</p>
                           <Button
                             size="lg"
@@ -321,7 +354,7 @@ export function HomePage() {
                           >
                             <Frown className="w-24 h-24 md:w-32 md:h-32 text-white mb-4 md:mb-6 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.2)]" />
                           </motion.div>
-                          <h2 className="text-4xl md:text-6xl font-black text-white mb-2 md:mb-4 uppercase italic leading-none">Time&apos;s Up!</h2>
+                          <h3 className="text-4xl md:text-6xl font-black text-white mb-2 md:mb-4 uppercase italic leading-none">Time&apos;s Up!</h3>
                           <p className="text-lg md:text-2xl font-black text-white/80 mb-6 md:mb-8">
                             You found {matchedCount / 2} of {totalSocks / 2} pairs. Try again!
                           </p>
@@ -349,36 +382,7 @@ export function HomePage() {
               )}
             </AnimatePresence>
           </main>
-          {gameState !== 'setup' && (
-            <footer className="flex justify-center shrink-0 pb-6 md:pb-8">
-              <Card className="px-8 md:px-12 py-4 md:py-6 border-4 border-[#1A1A1A] bg-sock-blue text-white rounded-3xl md:rounded-4xl shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
-                <div className="flex items-center gap-6 md:gap-12">
-                  <div className="text-center">
-                    <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest">Score</p>
-                    <p className="text-3xl md:text-5xl font-black tabular-nums">{score}</p>
-                  </div>
-                  <div className="h-10 md:h-12 w-1 bg-white/20 rounded-full" />
-                  <div className="text-center">
-                    <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest">Pairs</p>
-                    <p className="text-3xl md:text-5xl font-black tabular-nums">{matchedCount / 2}/{totalSocks / 2}</p>
-                  </div>
-                  <div className="h-10 md:h-12 w-1 bg-white/20 rounded-full" />
-                  <motion.div
-                    className="text-center"
-                    animate={isTimeLow ? { scale: [1, 1.08, 1] } : {}}
-                    transition={{ repeat: Infinity, duration: 0.6 }}
-                  >
-                    <p className="text-[10px] md:text-xs font-black uppercase opacity-80 tracking-widest flex items-center gap-1 justify-center">
-                      <Timer className="w-3 h-3" /> Time
-                    </p>
-                    <p className={`text-3xl md:text-5xl font-black tabular-nums ${isTimeLow ? 'text-sock-yellow' : ''}`}>
-                      {timeLeft}s
-                    </p>
-                  </motion.div>
-                </div>
-              </Card>
-            </footer>
-          )}
+
         </div>
       </div>
       <FeedbackOverlay status={status} isExiting={isExiting} />
