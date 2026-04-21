@@ -127,7 +127,7 @@ export function HomePage() {
         setScore(prev => prev + 2);
         setStatus('idle');
         setIsLocked(false);
-      }, 800);
+      }, 400);
     } else {
       setStatus('wrong');
       timerRef.current = setTimeout(() => {
@@ -135,7 +135,7 @@ export function HomePage() {
         setScore(prev => Math.max(0, prev - 1));
         setStatus('idle');
         setIsLocked(false);
-      }, 800);
+      }, 400);
     }
   }, []);
   const handleSockClick = (sock: SockData) => {
