@@ -2,7 +2,7 @@
 
 ## Built with
 - React Router 6, ShadCN UI, Tailwind, Lucide Icons, ESLint, Vite
-- Cloudflare Workers (serving/server-side when needed)
+- Express + Node.js (server-side API)
 
 ## Restrictions
 - Tailwind: define custom colors in `tailwind.config.js` (not in `index.css`)

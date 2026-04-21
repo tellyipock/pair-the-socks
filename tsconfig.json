@@ -13,9 +13,6 @@
 	],
 	"compilerOptions": {
 		"incremental": true,
-		"types": [
-			"@cloudflare/workers-types"
-		],
 		"baseUrl": ".",
 		"paths": {
 			"@/*": [

@@ -85,6 +85,23 @@ export function Sock({ id, color, pattern, size, side, className, onClick }: Soc
               <path d="M-20,80 Q10,70 40,80 T100,80 T140,80" stroke="white" strokeWidth="6" fill="none" />
             </g>
           )}
+          {pattern === 'zigzag' && (
+            <g stroke="white" strokeWidth="5" fill="none" opacity="0.5">
+              <polyline points="0,15 20,5 40,15 60,5 80,15 100,5" />
+              <polyline points="0,40 20,30 40,40 60,30 80,40 100,30" />
+              <polyline points="0,65 20,55 40,65 60,55 80,65 100,55" />
+              <polyline points="0,90 20,80 40,90 60,80 80,90 100,80" />
+              <polyline points="0,115 20,105 40,115 60,105 80,115 100,105" />
+            </g>
+          )}
+          {pattern === 'hearts' && (
+            <g fill="white" opacity="0.5">
+              <path d="M30,18 C30,14 24,10 20,14 C16,10 10,14 10,18 C10,24 20,30 20,30 C20,30 30,24 30,18 Z" transform="translate(15, 5) scale(0.85)" />
+              <path d="M30,18 C30,14 24,10 20,14 C16,10 10,14 10,18 C10,24 20,30 20,30 C20,30 30,24 30,18 Z" transform="translate(45, 35) scale(0.85)" />
+              <path d="M30,18 C30,14 24,10 20,14 C16,10 10,14 10,18 C10,24 20,30 20,30 C20,30 30,24 30,18 Z" transform="translate(10, 65) scale(0.85)" />
+              <path d="M30,18 C30,14 24,10 20,14 C16,10 10,14 10,18 C10,24 20,30 20,30 C20,30 30,24 30,18 Z" transform="translate(48, 85) scale(0.65)" />
+            </g>
+          )}
         </g>
         {/* Cuffs, Heel & Toe Highlights */}
         <path d="M20,5 L80,5" stroke="white" strokeWidth="4" strokeLinecap="round" opacity="0.3" />

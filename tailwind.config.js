@@ -21,9 +21,9 @@ export default {
   			foreground: 'hsl(var(--foreground))',
         sock: {
           yellow: '#FFD93D',
-          blue: '#4D96FF',
+          blue: '#00B0F0',
           red: '#FF6B6B',
-          green: '#6BCB77',
+          green: '#d2ffd1',
           purple: '#9B72AA'
         },
   			muted: {
